@@ -1,22 +1,22 @@
 import {
-    AMap,
-    BitmapDescriptor,
-    BitmapDescriptorFactory,
-    CameraPosition,
-    CameraUpdateFactory,
-    CircleOptions,
-    LatLng,
-    MapView,
-    MapViewComponent,
-    MapViewManager,
-    Marker,
-    MarkerOptions,
-    OnCameraChangeListener,
-    OnMarkerDragListener,
-    Poi,
-    PolygonOptions,
-    Polyline,
-    PolylineOptions
+  AMap,
+  BitmapDescriptor,
+  BitmapDescriptorFactory,
+  CameraPosition,
+  CameraUpdateFactory,
+  CircleOptions,
+  LatLng,
+  MapView,
+  MapViewComponent,
+  MapViewManager,
+  Marker,
+  MarkerOptions,
+  OnCameraChangeListener,
+  OnMarkerDragListener,
+  Poi,
+  PolygonOptions,
+  Polyline,
+  PolylineOptions
 } from '@amap/amap_lbs_map3d';
 
 import { Descriptor, RNOHContext, RNViewBase, ViewBaseProps } from '@rnoh/react-native-openharmony';
@@ -24,7 +24,6 @@ import { A_MAP_CIRCLE_VIEW_TYPE, AMapCircleProps, rgbaToHex } from './AMapCircle
 import { A_MAP_POLYGON_TYPE, AMapPolygonProps } from './AMapPolygon';
 import { A_MAP_POLYLINE_TYPE, AMapPolylineProps } from './AMapPolyline';
 import { A_MAP_MARKER_TYPE, AMapMarkerProps } from './AMapMarker';
-
 import Logger from '../Logger';
 import { ArrayList } from '@kit.ArkTS';
 
@@ -56,16 +55,11 @@ export const GOADE_MAP_VIEW_TYPE: string = "AMapView"
 
 export type GDMapViewDescriptor = Descriptor<"AMapView", MapViewProps>;
 
-export let globalContext: Context;
-
-export let markers: Array<Marker>
-
-export let mapMarker: Map<number, Array<Marker>> = new Map();
+let globalContext: Context;
 
 @Component
 export struct AMapView {
   static NAME: string = "AMapView";
-  static num: number = 0;
   ctx!: RNOHContext
   tag: number = -1
   type: string = ""
@@ -78,16 +72,15 @@ export struct AMapView {
   circleOption: Array<CircleOptions> = []
   polylineOption: Array<PolylineOptions> = []
   polygonOption: Array<PolygonOptions> = []
+  markerOption: Array<MarkerOptions> = []
 
   aboutToAppear(): void {
     globalContext = getContext().getApplicationContext();
     this.gDMapDescriptor = this.ctx.descriptorRegistry.getDescriptor<GDMapViewDescriptor>(this.tag);
-    markers = [];
     this.getProp(this.gDMapDescriptor);
-    AMapView.num++;
-    this.show();
+    this.getOverlay(this.gDMapDescriptor);
     this.unregisterDescriptorChangesListener = this.ctx.descriptorRegistry.subscribeToDescriptorChanges(this.tag,
-      (newDescriptor) => {
+       (newDescriptor) => {
         /*------ 当RN侧属性props有更改 -------*/
         console.log(`RNOH in GaoDeMap descriptor change`);
         this.gDMapDescriptor = (newDescriptor as GDMapViewDescriptor)
@@ -95,7 +88,7 @@ export struct AMapView {
         this.getOverlay(this.gDMapDescriptor);
       }
     )
-
+    this.show();
     this.cleanupCallback = this.ctx.componentCommandReceiver.registerCommandCallback(
       this.tag,
       (command, args: ESObject[]) => {
@@ -216,10 +209,8 @@ export struct AMapView {
     }
     this.mapView = mapview;
     this.mapView.onCreate();
-
     this.mapView.getMapAsync((map) => {
       this.aMap = map;
-      this.getOverlay(this.gDMapDescriptor);
       Logger.info('map3d', 'EntryAbility', 'get map ' + this.aMap?.getCameraPosition()?.zoom);
       if (this.initialCameraPosition != null) {
         this.aMap?.moveCamera(CameraUpdateFactory.newCameraPosition(this.initialCameraPosition));
@@ -289,6 +280,10 @@ export struct AMapView {
         }
       }
 
+      for (let index = 0; index < this.markerOption.length; ++index) {
+        this.aMap?.addMarker(this.markerOption[index]);
+      }
+
       this.aMap?.setOnPolylineClickListener((polyLine: Polyline): void => {
         for (let index = 0; index < this.polylineOption.length; ++index) {
           if (polyLine.getOptions() == this.polylineOption[index]) {
@@ -298,15 +293,9 @@ export struct AMapView {
       });
 
       this.aMap?.setOnMarkerClickListener((marker: Marker): boolean => {
-        if (mapMarker.get(AMapView.num)) {
-          let len: number | undefined = mapMarker.get(AMapView.num)?.length;
-          let markers: Array<Marker> | undefined = mapMarker.get(AMapView.num);
-          if (len && markers) {
-            for (let index = 0; index < len; ++index) {
-              if (marker.getOptions().getPosition() == markers[index].getPosition()) {
-                this.onMarkerClickFunction(index);
-              }
-            }
+        for (let index = 0; index < this.markerOption.length; ++index) {
+          if (marker.getOptions().getPosition() == this.markerOption[index].getPosition()) {
+            this.onMarkerClickFunction(index);
           }
         }
         return true;
@@ -314,41 +303,23 @@ export struct AMapView {
 
       this.aMap?.setOnMarkerDragListener(new OnMarkerDragListener(
         (DragStart: Marker) => {
-          for (let index = 0; index < markers.length; ++index) {
-            if (mapMarker.get(AMapView.num)) {
-              let len: number | undefined = mapMarker.get(AMapView.num)?.length;
-              let markers: Array<Marker> | undefined = mapMarker.get(AMapView.num);
-              if (len && markers) {
-                if (DragStart == markers[index]) {
-                  this.onMarkerDragStartFunction(index)
-                }
-              }
+          for (let index = 0; index < this.markerOption.length; ++index) {
+            if (DragStart.getOptions() == this.markerOption[index]) {
+              this.onMarkerDragStartFunction(index)
             }
           }
         },
         (Drag: Marker) => {
-          for (let index = 0; index < markers.length; ++index) {
-            if (mapMarker.get(AMapView.num)) {
-              let len: number | undefined = mapMarker.get(AMapView.num)?.length;
-              let markers: Array<Marker> | undefined = mapMarker.get(AMapView.num);
-              if (len && markers) {
-                if (Drag == markers[index]) {
-                  this.onMarkerDragFunction(index)
-                }
-              }
+          for (let index = 0; index < this.markerOption.length; ++index) {
+            if (Drag.getOptions() == this.markerOption[index]) {
+              this.onMarkerDragFunction(index)
             }
           }
         },
         (DragEnd: Marker) => {
-          for (let index = 0; index < markers.length; ++index) {
-            if (mapMarker.get(AMapView.num)) {
-              let len: number | undefined = mapMarker.get(AMapView.num)?.length;
-              let markers: Array<Marker> | undefined = mapMarker.get(AMapView.num);
-              if (len && markers) {
-                if (DragEnd == markers[index]) {
-                  this.onMarkerDragEndFunction(DragEnd.getPosition(), index)
-                }
-              }
+          for (let index = 0; index < this.markerOption.length; ++index) {
+            if (DragEnd.getOptions() == this.markerOption[index]) {
+              this.onMarkerDragEndFunction(DragEnd.getPosition(), index)
             }
           }
         })
@@ -508,73 +479,64 @@ export struct AMapView {
         case A_MAP_MARKER_TYPE:
           let mapMarkerProps =
             this.ctx.descriptorRegistry.getDescriptor(descriptor.childrenTags[i]).props as AMapMarkerProps;
-          for (let i = 0; i < (mapMarker.get(AMapView.num) ?? []).length; ++i) { //遍历数组里是否有之前的经纬度 没有在新增  修改
-            let marker = (mapMarker.get(AMapView.num) ?? []);
-            if ((mapMarkerProps.position.latitude == marker[i].getPosition().latitude)
-              && (mapMarkerProps.position.longitude == marker[i].getPosition().longitude)) {
+          for (let i = 0; i < this.markerOption.length; ++i) { //遍历数组里是否有之前的经纬度 没有在新增
+            if ((mapMarkerProps.position.latitude == this.markerOption[i].getPosition().latitude)
+              && (mapMarkerProps.position.longitude == this.markerOption[i].getPosition().longitude)) {
               flag = true;
-              marker[i].setAnchor(mapMarkerProps.anchor ? mapMarkerProps.anchor.x : 1,
+              this.markerOption[i].setAnchor(mapMarkerProps.anchor ? mapMarkerProps.anchor.x : 1,
                 mapMarkerProps.anchor ? mapMarkerProps.anchor.y : 0.5);
-              marker[i].setDraggable(mapMarkerProps.draggable ? mapMarkerProps.draggable : false);
-              marker[i].setZIndex(mapMarkerProps.zIndex ? mapMarkerProps.zIndex : 1);
-              marker[i].setFlat(mapMarkerProps.flat ? mapMarkerProps.flat : false);
+              this.markerOption[i].setInfoWindowOffset(mapMarkerProps.centerOffset ? mapMarkerProps.centerOffset.x : 0,
+                mapMarkerProps.centerOffset ? mapMarkerProps.centerOffset.y : 0);
               if (mapMarkerProps.icon) {
+                let resoure: string = mapMarkerProps.icon["uri"];
                 try {
-                  let resoure: string = mapMarkerProps.icon["uri"];
                   let bitmapDes: BitmapDescriptor | undefined =
                     await BitmapDescriptorFactory.fromRawfilePath(globalContext, resoure);
-                  marker[i].setIcon(bitmapDes);
+                  this.markerOption[i].setIcon(bitmapDes);
                 } catch (error) {
                   let bitmapDesNull: BitmapDescriptor | undefined =
                     await BitmapDescriptorFactory.fromRawfilePath(globalContext, "common/marker_default.png");
                   if (bitmapDesNull) {
-                    marker[i].setIcon(bitmapDesNull);
+                    this.markerOption[i].setIcon(bitmapDesNull);
                   }
                 }
               }
+              this.markerOption[i].setDraggable(mapMarkerProps.draggable ? mapMarkerProps.draggable : false);
+              this.markerOption[i].setZIndex(mapMarkerProps.zIndex ? mapMarkerProps.zIndex : 1);
+              this.markerOption[i].setFlat(mapMarkerProps.flat ? mapMarkerProps.flat : false);
               break;
             }
           }
           if (!flag) {
             let markerOptions = new MarkerOptions();
             this.markerTag.push(this.ctx.descriptorRegistry.getDescriptor(descriptor.childrenTags[i]).tag);
-            if (!this.aMap) {
-            } else {
+            markerOptions.setPosition(new LatLng(mapMarkerProps.position.latitude,
+              mapMarkerProps.position.longitude));
+            markerOptions.setAnchor(mapMarkerProps.anchor ? mapMarkerProps.anchor.x : 1,
+              mapMarkerProps.anchor ? mapMarkerProps.anchor.y : 0.5);
+            markerOptions.setInfoWindowOffset(mapMarkerProps.centerOffset ? mapMarkerProps.centerOffset.x : 0,
+              mapMarkerProps.centerOffset ? mapMarkerProps.centerOffset.y : 0);
+            markerOptions.setTitle('Marker');
+            markerOptions.setSnippet('MapView Test')
+            if (mapMarkerProps.icon) {
+              let resoure: string = mapMarkerProps.icon["uri"];
               try {
-                let marker = this.aMap.addMarker(markerOptions);
-                if (!marker) {
-                  console.error('mapMarkerProps---------Failed to add marker. Check markerOptions:', markerOptions);
-                } else {
-                  if (marker) {
-                    markers.push(marker);
-                    marker.setPosition(new LatLng(mapMarkerProps.position.latitude,
-                      mapMarkerProps.position.longitude));
-                    marker.setAnchor(mapMarkerProps.anchor ? mapMarkerProps.anchor.x : 1,
-                      mapMarkerProps.anchor ? mapMarkerProps.anchor.y : 0.5);
-                    if (mapMarkerProps.icon) {
-                      try {
-                        let resoure: string = mapMarkerProps.icon["uri"];
-                        let bitmapDes: BitmapDescriptor | undefined =
-                          await BitmapDescriptorFactory.fromRawfilePath(globalContext, resoure);
-                        marker.setIcon(bitmapDes);
-                      } catch (error) {
-                        let bitmapDesNull: BitmapDescriptor | undefined =
-                          await BitmapDescriptorFactory.fromRawfilePath(globalContext, "common/marker_default.png");
-                        if (bitmapDesNull) {
-                          marker.setIcon(bitmapDesNull);
-                        }
-                      }
-                    }
-                    marker.setDraggable(mapMarkerProps.draggable ? mapMarkerProps.draggable : false);
-                    marker.setZIndex(mapMarkerProps.zIndex ? mapMarkerProps.zIndex : 1);
-                    marker.setFlat(mapMarkerProps.flat ? mapMarkerProps.flat : false);
-                    mapMarker.set(AMapView.num, markers);
-                  }
-                }
+                let bitmapDes: BitmapDescriptor | undefined =
+                  await BitmapDescriptorFactory.fromRawfilePath(globalContext, resoure);
+                markerOptions.setIcon(bitmapDes);
               } catch (error) {
-                console.error('mapMarkerProps---------Error adding marker:', error);
+                let bitmapDesNull: BitmapDescriptor | undefined =
+                  await BitmapDescriptorFactory.fromRawfilePath(globalContext, "common/marker_default.png");
+                if (bitmapDesNull) {
+                  markerOptions.setIcon(bitmapDesNull);
+                }
               }
             }
+            markerOptions.setDraggable(mapMarkerProps.draggable ? mapMarkerProps.draggable : false);
+            markerOptions.setZIndex(mapMarkerProps.zIndex ? mapMarkerProps.zIndex : 1);
+            markerOptions.setFlat(mapMarkerProps.flat ? mapMarkerProps.flat : false);
+            this.aMap?.addMarker(markerOptions);
+            this.markerOption.push(markerOptions)
           }
           break;
       }
@@ -591,8 +553,6 @@ export struct AMapView {
       this.mapView = undefined;
       this.aMap = undefined;
     }
-    mapMarker.delete(AMapView.num);
-    AMapView.num -= 1;
   }
 
   build() {
