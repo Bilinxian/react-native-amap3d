@@ -1,9 +1,9 @@
 import {
   AMap,
-  BitmapDescriptor,
   BitmapDescriptorFactory,
   CameraPosition,
   CameraUpdateFactory,
+  CancelableCallback,
   CircleOptions,
   LatLng,
   MapView,
@@ -490,8 +490,9 @@ export struct AMapView {
               if (mapMarkerProps.icon) {
                 let resoure: string = mapMarkerProps.icon["uri"];
                 try {
+                  const iconName = icon.substring(resoure.lastIndexOf('/'))
                   let bitmapDes: BitmapDescriptor | undefined =
-                    await BitmapDescriptorFactory.fromRawfilePath(globalContext, resoure);
+                    await BitmapDescriptorFactory.fromRawfilePath(globalContext, "rawfile" + iconName);
                   this.markerOption[i].setIcon(bitmapDes);
                 } catch (error) {
                   let bitmapDesNull: BitmapDescriptor | undefined =
@@ -521,8 +522,9 @@ export struct AMapView {
             if (mapMarkerProps.icon) {
               let resoure: string = mapMarkerProps.icon["uri"];
               try {
+                const iconName = icon.substring(resoure.lastIndexOf('/'))
                 let bitmapDes: BitmapDescriptor | undefined =
-                  await BitmapDescriptorFactory.fromRawfilePath(globalContext, resoure);
+                  await BitmapDescriptorFactory.fromRawfilePath(globalContext, "rawfile" + iconName);
                 markerOptions.setIcon(bitmapDes);
               } catch (error) {
                 let bitmapDesNull: BitmapDescriptor | undefined =
@@ -553,6 +555,8 @@ export struct AMapView {
       this.mapView = undefined;
       this.aMap = undefined;
     }
+    this.unregisterDescriptorChangesListener?.()
+    this.cleanupCallback?.()
   }
 
   build() {

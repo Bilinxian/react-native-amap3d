@@ -1,8 +1,20 @@
-import { LatLng} from '@amap/amap_lbs_map3d'
+import { LatLng } from '@amap/amap_lbs_map3d'
 import { Descriptor, RNOHContext, ViewBaseProps } from '@rnoh/react-native-openharmony';
 
 export function rgbaToHex(rgbaString: string): number {
+  if (rgbaString.includes('#')) {
+    rgbaString = rgbaString.replace('#', '')
+    if (rgbaString.length === 3) {
+      rgbaString = rgbaString.replace(/(.)/g, '$1$1')
+    }
+    let r = parseInt(rgbaString.substr(0, 2), 16),
+      g = parseInt(rgbaString.substr(2, 2), 16),
+      b = parseInt(rgbaString.substr(4, 2), 16),
+      a = parseInt(rgbaString.substr(6, 2), 16) || 255;
+    rgbaString = `rgba(${r}, ${g}, ${b}, ${a / 255})`
+  }
   const match = rgbaString.match(/(\d+(\.\d+)?)/g);
+
   if (match && match.length >= 4) {
     const alpha = Math.round(parseFloat(match[3]) * 255); // 将 alpha 值转换为 0-255 范围内的整数
     const red = parseInt(match[0]);
@@ -26,12 +38,14 @@ export interface AMapCircleProps extends ViewBaseProps {
 export const A_MAP_CIRCLE_VIEW_TYPE: string = "AMapCircle";
 
 export type AMapCircleDescriptor = Descriptor<"AMapCircle", AMapCircleProps>
+
 @Entry
 @Component
 export struct AMapCircle {
-  static NAME:string = "AMapCircle";
+  static NAME: string = "AMapCircle";
   ctx!: RNOHContext
   tag: number = -1
+
   // @State gDMapDescriptor: GDMapViewDescriptor = {} as GDMapViewDescriptor
   build() {
   }
