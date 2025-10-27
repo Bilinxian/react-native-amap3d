@@ -1,7 +1,8 @@
 {
-  "name": "@react-native-oh-tpl/react-native-amap3d",
-  "version": "3.2.4-0.0.8",
-  "description": "react-native 高德地图组件，支持 harmonyOS",
+  "name": "react-native-amap3d",
+  "version": "3.2.4",
+  "description": "react-native 高德地图组件，支持 Android + iOS",
+  "author": "7c00 <i@7c00.cc>",
   "license": "MIT",
   "keywords": [
     "react-native",
@@ -12,29 +13,26 @@
   "main": "lib/src",
   "files": [
     "lib/src",
+    "lib/android/src",
+    "lib/android/build.gradle",
+    "lib/ios",
     "react-native.config.js",
-    "react-native-amap3d.podspec",
-    "harmony"
+    "react-native-amap3d.podspec"
   ],
-  "homepage": "https://github.com/react-native-oh-library/react-native-amap3d",
+  "homepage": "https://github.com/qiuxiang/react-native-amap3d",
   "repository": {
     "type": "git",
-    "url": "https://github.com/react-native-oh-library/react-native-amap3d"
+    "url": "https://github.com/qiuxiang/react-native-amap3d"
   },
   "scripts": {
     "start": "react-native start",
-    "reload": "adb reverse tcp:8081 tcp:8081 && adb shell input text rr"
-  },
-  "harmony": {
-    "alias": "react-native-amap3d"
+    "android": "react-native run-android",
+    "release-android": "react-native run-android --variant=release",
+    "reload": "adb reverse tcp:8081 tcp:8081 && adb shell input text rr",
+    "ios": "react-native run-ios"
   },
   "dependencies": {
-    "supercluster": "^7.1.4",
-    "react-native-amap3d": "3.2.4"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
+    "supercluster": "^7.1.4"
   },
   "devDependencies": {
     "@react-native-picker/picker": "^2.4.8",

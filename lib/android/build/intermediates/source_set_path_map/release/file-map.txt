@@ -1,0 +1,8 @@
+qiuxiang.amap3d.react-native-amap3d-pngs-0 /Users/wangzhi/Downloads/project/android-crm/node_modules/react-native-amap3d/lib/android/build/generated/res/pngs/release
+qiuxiang.amap3d.react-native-amap3d-resValues-1 /Users/wangzhi/Downloads/project/android-crm/node_modules/react-native-amap3d/lib/android/build/generated/res/resValues/release
+qiuxiang.amap3d.react-native-amap3d-rs-2 /Users/wangzhi/Downloads/project/android-crm/node_modules/react-native-amap3d/lib/android/build/generated/res/rs/release
+qiuxiang.amap3d.react-native-amap3d-mergeReleaseResources-3 /Users/wangzhi/Downloads/project/android-crm/node_modules/react-native-amap3d/lib/android/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
+qiuxiang.amap3d.react-native-amap3d-mergeReleaseResources-4 /Users/wangzhi/Downloads/project/android-crm/node_modules/react-native-amap3d/lib/android/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+qiuxiang.amap3d.react-native-amap3d-merged_res-5 /Users/wangzhi/Downloads/project/android-crm/node_modules/react-native-amap3d/lib/android/build/intermediates/merged_res/release
+qiuxiang.amap3d.react-native-amap3d-main-6 /Users/wangzhi/Downloads/project/android-crm/node_modules/react-native-amap3d/lib/android/src/main/res
+qiuxiang.amap3d.react-native-amap3d-release-7 /Users/wangzhi/Downloads/project/android-crm/node_modules/react-native-amap3d/lib/android/src/release/res

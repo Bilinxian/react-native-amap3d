@@ -1,17 +1,36 @@
+import { requireNativeComponent } from "react-native";
+import { LatLng } from "./types";
 
-import AMapCircle ,{CircleProps} from './circleNativeComponent'
-import React , {Component}  from 'react';
+export interface CircleProps {
+  /**
+   * 圆点坐标
+   */
+  center: LatLng;
 
+  /**
+   * 半径（米）
+   */
+  radius: number;
 
-export default class Circle extends Component<CircleProps> {
- 
-  constructor(props: CircleProps) {
-    super(props);
-  }
+  /**
+   * 边线宽度
+   */
+  strokeWidth?: number;
 
-  render() {
-    return (
-      <AMapCircle {...this.props} />
-    );
-  }
+  /**
+   * 边线颜色
+   */
+  strokeColor?: string;
+
+  /**
+   * 填充颜色
+   */
+  fillColor?: string;
+
+  /**
+   * 层级
+   */
+  zIndex?: number;
 }
+
+export default requireNativeComponent<CircleProps>("AMapCircle");
