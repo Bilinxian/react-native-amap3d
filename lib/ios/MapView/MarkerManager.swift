@@ -13,9 +13,18 @@ class AMapMarkerManager: RCTViewManager {
   }
 
   func getView(reactTag: NSNumber, callback: @escaping (Marker) -> Void) {
-    bridge.uiManager.addUIBlock { _, viewRegistry in
-      callback(viewRegistry![reactTag] as! Marker)
+    DispatchQueue.main.async { [weak self] in
+      guard let self else {
+          return
+      }
+
+      let view = self.bridge.uiManager.view(forReactTag: reactTag)
+      guard let videoView = view as? Marker else {
+        return
+      }
+      callback(videoView)
     }
+
   }
 }
 
