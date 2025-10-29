@@ -19,10 +19,10 @@ class AMapMarkerManager: RCTViewManager {
       }
 
       let view = self.bridge.uiManager.view(forReactTag: reactTag)
-      guard let videoView = view as? Marker else {
+      guard let view = view as? Marker else {
         return
       }
-      callback(videoView)
+      callback(view)
     }
 
   }
