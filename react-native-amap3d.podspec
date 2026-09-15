@@ -10,11 +10,13 @@ Pod::Spec.new do |s|
   s.license      = package["license"]
   s.authors      = package["author"]
 
-  s.platforms    = { :ios => "10.0" }
-  s.source       = { :git => "https://github.com/qiuxiang/react-native-amap3d.git", :tag => "#{s.version}" }
+  # Xcode 27 部署目标范围为 15.0–27.0；低于 15 无法编译。
+  s.platforms    = { :ios => "15.0" }
+  s.source       = { :git => "https://github.com/Bilinxian/react-native-amap3d.git", :tag => "#{s.version}" }
 
   s.source_files = "lib/ios/**/*.{h,m,mm,swift}"
 
   s.dependency "React-Core"
-  s.dependency 'AMap3DMap', "~> 10.1.500"
+  # 9.6.x MAMapKit 在 Xcode 16+/27 链接时报 Pointer not aligned；10.1.600 已修复。
+  s.dependency 'AMap3DMap', '10.1.600'
 end
