@@ -15,7 +15,7 @@ export interface MarkerProps {
   /**
    * 坐标
    */
-  latLng: LatLng;
+  position: LatLng;
 
   /**
    * 图标
@@ -110,7 +110,8 @@ export default class extends Component<MarkerProps> {
 
   render() {
     const props = { ...this.props };
-    // @ts-ignore android 不能用 position 作为属性，会发生冲突，也是个蛋疼的问题
+    Reflect.set(props, "latLng", props.position);
+    // @ts-ignore android 不能用 position 作为属性，会发生冲突
     delete props.position;
     if (props.children) {
       props.children = (
